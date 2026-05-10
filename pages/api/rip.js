@@ -36,7 +36,7 @@ export default async function handler(req, res) {
 
       let title = `starmaker-${recordingId}`;
 
-      // Strategy 1: Try StarMaker API with multiple field names
+      // Strategy 1: StarMaker API
       try {
         const apiRes = await fetch(
           `https://www.starmakerstudios.com/api/social/recording/info?recordingId=${recordingId}`,
@@ -44,7 +44,6 @@ export default async function handler(req, res) {
         );
         if (apiRes.ok) {
           const data = await apiRes.json();
-          // Try every possible field name
           const raw =
             data?.data?.recordingName ||
             data?.data?.name ||
@@ -58,11 +57,20 @@ export default async function handler(req, res) {
             data?.name ||
             data?.title ||
             '';
-          if (raw) title = raw.replace(/[^\w\s\-()]/g, '').trim().slice(0, 80);
+
+          if (raw) {
+            let cleaned = raw;
+            // Extract song name from share text e.g. "User just sang the song X how can the voice..."
+            const songMatch = raw.match(/(?:just sang(?:\s+the\s+song)?|sang\s+the\s+song)\s+(.+?)(?:\s+how\s+|\s+check\s+|\s+listen\s+|\s+i\s+|\s+my\s+|$)/i);
+            if (songMatch) {
+              cleaned = songMatch[1];
+            }
+            title = cleaned.replace(/[^\w\s\-()]/g, '').trim().slice(0, 80);
+          }
         }
       } catch (_) {}
 
-      // Strategy 2: Fetch share page and extract og:title
+      // Strategy 2: Fetch share page og:title
       if (title.startsWith('starmaker-')) {
         try {
           const pageRes = await fetch(
@@ -75,7 +83,9 @@ export default async function handler(req, res) {
             const metaTitle = html.match(/<title>([^<]+)<\/title>/);
             const raw = ogTitle?.[1] || metaTitle?.[1] || '';
             if (raw && !raw.toLowerCase().includes('starmaker')) {
-              title = raw.replace(/[^\w\s\-()]/g, '').trim().slice(0, 80);
+              // Also try to extract song name from og:title if it's a share phrase
+              const songMatch = raw.match(/(?:just sang(?:\s+the\s+song)?|sang\s+the\s+song)\s+(.+?)(?:\s+how\s+|\s+check\s+|\s+listen\s+|$)/i);
+              title = (songMatch ? songMatch[1] : raw).replace(/[^\w\s\-()]/g, '').trim().slice(0, 80);
             }
           }
         } catch (_) {}
