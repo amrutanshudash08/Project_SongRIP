@@ -161,7 +161,7 @@ export default function SongRip() {
           @keyframes fade-up { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
           @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
           .sr-input { background:none; border:none; outline:none; color:#EDE8DF; font-family:'Outfit',sans-serif; font-size:14px; font-weight:300; width:100%; letter-spacing:.3px; }
-          .sr-input::placeholder { color:#4A4840; }
+          .sr-input::placeholder { color:#9A9088; }
           .rip-btn { position:relative; overflow:hidden; background:transparent; border:1px solid ${G3}; color:${G}; font-family:'Outfit',sans-serif; font-size:10px; font-weight:500; letter-spacing:3.5px; text-transform:uppercase; padding:15px 32px; border-radius:2px; cursor:pointer; transition:color .3s,border-color .3s; }
           .rip-btn::after { content:''; position:absolute; inset:0; background:${G}; transform:scaleX(0); transform-origin:left; transition:transform .3s cubic-bezier(.16,1,.3,1); }
           .rip-btn:hover:not(:disabled) { color:#08090E; border-color:${G}; }
@@ -197,8 +197,8 @@ export default function SongRip() {
           <div style={{ marginTop:16, display:"flex", alignItems:"center", justifyContent:"center" }}>
             {["Smule","StarMaker","Yokee","SingSnap"].map((n, i) => (
               <span key={i} style={{ display:"flex", alignItems:"center" }}>
-                <span style={{ fontSize:10, letterSpacing:"2px", textTransform:"uppercase", color:"#6A6458" }}>{n}</span>
-                {i < 3 && <span style={{ margin:"0 12px", color:"#3A3830" }}>·</span>}
+                <span style={{ fontSize:10, letterSpacing:"2px", textTransform:"uppercase", color:"#9A9088" }}>{n}</span>
+                {i < 3 && <span style={{ margin:"0 12px", color:"#9A9088" }}>·</span>}
               </span>
             ))}
           </div>
@@ -217,7 +217,7 @@ export default function SongRip() {
             <VinylRecord spinning={isLoading} size={188} />
             <Waveform active={isLoading || isReady} />
             {isLoading && (
-              <div style={{ fontSize:9, letterSpacing:"3.5px", textTransform:"uppercase", color:G3 }}>
+              <div style={{ fontSize:9, letterSpacing:"3.5px", textTransform:"uppercase", color:G }}>
                 Extracting
               </div>
             )}
@@ -228,7 +228,7 @@ export default function SongRip() {
 
             {!isReady && (
               <>
-                <div style={{ fontSize:9, letterSpacing:"3px", textTransform:"uppercase", color:"#7A7468", marginBottom:28, fontWeight:400 }}>
+                <div style={{ fontSize:9, letterSpacing:"3px", textTransform:"uppercase", color:"#A09888", marginBottom:28, fontWeight:400 }}>
                   {isLoading ? "Extracting audio…" : "Paste sharing link"}
                 </div>
 
@@ -247,7 +247,7 @@ export default function SongRip() {
                     disabled={isLoading} />
                   {url && !isLoading && (
                     <button onClick={() => setUrl("")}
-                      style={{ background:"none", border:"none", color:"#4A4840", cursor:"pointer", fontSize:17, padding:0, lineHeight:1 }}>×</button>
+                      style={{ background:"none", border:"none", color:"#9A9088", cursor:"pointer", fontSize:17, padding:0, lineHeight:1 }}>×</button>
                   )}
                 </div>
 
@@ -270,8 +270,8 @@ export default function SongRip() {
                         transition:"width .5s ease" }} />
                     </div>
                     <div style={{ display:"flex", justifyContent:"space-between" }}>
-                      <span style={{ fontSize:9, letterSpacing:"2.5px", textTransform:"uppercase", color:"#7A7468" }}>Processing</span>
-                      <span style={{ fontSize:9, letterSpacing:"2px", color:G3 }}>{Math.round(progress)}%</span>
+                      <span style={{ fontSize:9, letterSpacing:"2.5px", textTransform:"uppercase", color:"#A09888" }}>Processing</span>
+                      <span style={{ fontSize:9, letterSpacing:"2px", color:G }}>{Math.round(progress)}%</span>
                     </div>
                   </div>
                 )}
@@ -288,7 +288,7 @@ export default function SongRip() {
                   </button>
                   {isError && (
                     <button onClick={reset}
-                      style={{ background:"none", border:"none", color:"#7A7468", cursor:"pointer", fontSize:9, letterSpacing:"2.5px", textTransform:"uppercase", fontFamily:"inherit", padding:0 }}>
+                      style={{ background:"none", border:"none", color:"#A09888", cursor:"pointer", fontSize:9, letterSpacing:"2.5px", textTransform:"uppercase", fontFamily:"inherit", padding:0 }}>
                       Reset
                     </button>
                   )}
@@ -298,14 +298,14 @@ export default function SongRip() {
 
             {isReady && result && (
               <div style={{ animation:"fade-up .5s ease" }}>
-                <div style={{ fontSize:9, letterSpacing:"3px", textTransform:"uppercase", color:G3, marginBottom:28, fontWeight:400 }}>
+                <div style={{ fontSize:9, letterSpacing:"3px", textTransform:"uppercase", color:G, marginBottom:28, fontWeight:400 }}>
                   Ready to download
                 </div>
                 <div style={{ borderLeft:`2px solid ${G3}`, paddingLeft:18, marginBottom:36 }}>
                   <div style={{ fontFamily:"'Cormorant Garamond',Georgia,serif", fontSize:22, fontWeight:300, color:"#EDE8DF", lineHeight:1.2, marginBottom:6 }}>
                     {result.title}
                   </div>
-                  <div style={{ fontSize:9, letterSpacing:"2.5px", textTransform:"uppercase", color:"#7A7468" }}>
+                  <div style={{ fontSize:9, letterSpacing:"2.5px", textTransform:"uppercase", color:"#A09888" }}>
                     {result.ext?.toUpperCase()} · Audio extracted
                   </div>
                 </div>
@@ -329,20 +329,20 @@ export default function SongRip() {
               borderTop:"1px solid rgba(255,255,255,.05)", borderBottom:"1px solid rgba(255,255,255,.05)",
               borderLeft: i === 0 ? "1px solid rgba(255,255,255,.07)" : "none",
               borderRight: "1px solid rgba(255,255,255,.07)" }}>
-              <div style={{ fontFamily:"'Cormorant Garamond',Georgia,serif", fontSize:30, fontWeight:300, color:"rgba(191,155,69,.18)", lineHeight:1, marginBottom:8 }}>{s.num}</div>
-              <div style={{ fontSize:9, letterSpacing:"2.5px", textTransform:"uppercase", color:"#7A7468", fontWeight:500, marginBottom:6 }}>{s.label}</div>
-              <div style={{ fontSize:11, color:"#5A5650", lineHeight:1.75, fontWeight:300 }}>{s.desc}</div>
+              <div style={{ fontFamily:"'Cormorant Garamond',Georgia,serif", fontSize:30, fontWeight:300, color:"rgba(191,155,69,.4)", lineHeight:1, marginBottom:8 }}>{s.num}</div>
+              <div style={{ fontSize:9, letterSpacing:"2.5px", textTransform:"uppercase", color:"#A09888", fontWeight:500, marginBottom:6 }}>{s.label}</div>
+              <div style={{ fontSize:11, color:"#8A8478", lineHeight:1.75, fontWeight:300 }}>{s.desc}</div>
             </div>
           ))}
         </div>
 
         {/* Footer */}
         <div style={{ marginTop:32, display:"flex", flexDirection:"column", alignItems:"center", gap:8, animation:"fade-up .65s ease .35s both" }}>
-          <div style={{ fontSize:9, letterSpacing:"2.5px", textTransform:"uppercase", color:"#4A4840" }}>
+          <div style={{ fontSize:9, letterSpacing:"2.5px", textTransform:"uppercase", color:"#9A9088" }}>
             Personal use only · Respect artists' rights
           </div>
-          <div style={{ fontSize:11, letterSpacing:"1px", color:"#6A6458", fontWeight:300, display:"flex", alignItems:"center", gap:7 }}>
-            <span style={{ color:G3, fontSize:10 }}>✦</span>
+          <div style={{ fontSize:11, letterSpacing:"1px", color:"#9A9088", fontWeight:300, display:"flex", alignItems:"center", gap:7 }}>
+            <span style={{ color:G, fontSize:10 }}>✦</span>
             Made by{" "}
             <span style={{ fontFamily:"'Cormorant Garamond',Georgia,serif", fontSize:14, fontWeight:400, fontStyle:"italic", color:G, letterSpacing:".5px" }}>
               Amrutanshu Dash
