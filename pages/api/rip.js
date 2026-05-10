@@ -11,13 +11,23 @@ export default async function handler(req, res) {
 
     // ── StarMaker ──────────────────────────────────────────────────────
     if (url.includes('starmaker') || url.includes('starmakerstudios')) {
-      const params = new URL(url).searchParams;
-      const recordingId = params.get('recordingId');
-      if (!recordingId) throw new Error('Could not find recording ID in StarMaker link.');
+  const params = new URL(url).searchParams;
+  const recordingId = params.get('recordingId');
+  if (!recordingId) throw new Error('Could not find recording ID in StarMaker link.');
 
-      const audioUrl = `https://static-v7.smintro.com/production/uploading/recordings/${recordingId}/master.mp4`;
-      return res.json({ url: audioUrl, filename: `starmaker-${recordingId}.m4a`, title: `StarMaker Recording`, ext: 'm4a' });
-    }
+  const audioUrl = `https://static-v7.smintro.com/production/uploading/recordings/${recordingId}/master.mp4`;
+
+  // Proxy the file so we can set the correct Content-Type for iOS
+  const fileRes = await fetch(audioUrl);
+  if (!fileRes.ok) throw new Error('Could not fetch audio file.');
+
+  res.setHeader('Content-Type', 'audio/mp4');
+  res.setHeader('Content-Disposition', `attachment; filename="starmaker-${recordingId}.m4a"`);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
+  const buffer = await fileRes.arrayBuffer();
+  return res.send(Buffer.from(buffer));
+}
 
     // ── Smule ──────────────────────────────────────────────────────────
     if (url.includes('smule.com')) {
