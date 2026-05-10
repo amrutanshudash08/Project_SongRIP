@@ -9,7 +9,12 @@ export default async function handler(req, res) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req.body),
     });
-    const data = await upstream.json();
+    let data;
+    try {
+      data = await upstream.json();
+    } catch {
+      throw new Error(`Server error (${upstream.status}) — backend may be starting up, wait 10s and retry.`);
+    }
     res.status(upstream.status).json(data);
   } catch (e) {
     res.status(500).json({ error: e.message });
