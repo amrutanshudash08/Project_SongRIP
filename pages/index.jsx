@@ -121,21 +121,11 @@ export default function SongRip() {
 
   async function handleDownload() {
   if (!result) return;
-  try {
-    const response = await fetch(result.url);
-    const blob = await response.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = blobUrl;
-    a.download = result.filename;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-  } catch (e) {
-    // Fallback — open in new tab
-    window.open(result.url, "_blank");
-  }
+  const a = document.createElement("a");
+  a.href = `/api/download?url=${encodeURIComponent(result.url)}&filename=${encodeURIComponent(result.filename)}`;
+  a.download = result.filename;
+  a.click();
 }
-
   function reset() {
     setUrl(""); setStatus(STATUS.idle); setResult(null); setError(""); setProgress(0);
     setTimeout(() => inputRef.current?.focus(), 80);
