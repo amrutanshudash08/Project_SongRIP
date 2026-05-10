@@ -1,5 +1,7 @@
 import json
+import re
 from http.server import BaseHTTPRequestHandler
+from urllib.parse import urlparse, urlunparse
 import yt_dlp
 
 ALLOWED_DOMAINS = [
@@ -26,6 +28,16 @@ class handler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(length))
             url = body.get("url", "").strip()
 
+            # Auto-extract URL if user pasted the full share message text
+            url_match = re.search(r'https?://\S+', url)
+            if url_match:
+                url = url_match.group(0).rstrip("'\".,)")
+
+            # Strip UTM params and social suffixes (/twitter, /facebook etc.)
+            parsed = urlparse(url)
+            clean_path = re.sub(r'/(twitter|facebook|instagram|whatsapp|copy|embed)/?$', '', parsed.path)
+            url = urlunparse(parsed._replace(path=clean_path, query='', fragment=''))
+
             if not url:
                 return self._error(400, "No URL provided.")
 
@@ -43,7 +55,6 @@ class handler(BaseHTTPRequestHandler):
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=False)
 
-            # Find the best audio URL
             audio_url = None
             ext = "m4a"
             title = info.get("title", "recording")
@@ -52,7 +63,6 @@ class handler(BaseHTTPRequestHandler):
                 audio_url = info["url"]
                 ext = info.get("ext", "m4a")
             elif info.get("formats"):
-                # Pick best audio-only format
                 formats = [f for f in info["formats"] if f.get("acodec") != "none"]
                 if formats:
                     best = max(formats, key=lambda f: f.get("abr") or 0)
@@ -62,7 +72,6 @@ class handler(BaseHTTPRequestHandler):
             if not audio_url:
                 return self._error(422, "Could not extract audio from this link.")
 
-            # Sanitise filename
             safe_title = "".join(c for c in title if c.isalnum() or c in " -_()").strip()[:80] or "recording"
             filename = f"{safe_title}.{ext}"
 
@@ -88,13 +97,4 @@ class handler(BaseHTTPRequestHandler):
     def _cors(self):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
-
-    def _error(self, code: int, message: str):
-        payload = json.dumps({"error": message}).encode()
-        self.send_response(code)
-        self._cors()
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(payload)))
-        self.end_headers()
-        self.wfile.write(payload)
+        self.send_header("Access-Control-Allow-Headers",
