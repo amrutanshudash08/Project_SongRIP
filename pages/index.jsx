@@ -101,8 +101,15 @@ export default function SongRip() {
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ url }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Unknown error");
+
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error(`Server error (${res.status}) — the backend may still be starting up. Wait 10 seconds and try again.`);
+      }
+
+      if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
 
       setResult(data);
       setStatus(STATUS.ready);
