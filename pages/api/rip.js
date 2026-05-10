@@ -16,7 +16,7 @@ export default async function handler(req, res) {
       if (!recordingId) throw new Error('Could not find recording ID in StarMaker link.');
 
       const audioUrl = `https://static-v7.smintro.com/production/uploading/recordings/${recordingId}/master.mp4`;
-      return res.json({ url: audioUrl, filename: `starmaker-${recordingId}.mp4`, title: `StarMaker Recording`, ext: 'mp4' });
+      return res.json({ url: audioUrl, filename: `starmaker-${recordingId}.m4a`, title: `StarMaker Recording`, ext: 'm4a' });
     }
 
     // ── Smule ──────────────────────────────────────────────────────────
