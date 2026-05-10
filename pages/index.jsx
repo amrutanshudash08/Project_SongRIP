@@ -119,15 +119,22 @@ export default function SongRip() {
     }
   }
 
-  function handleDownload() {
-    if (!result) return;
+  async function handleDownload() {
+  if (!result) return;
+  try {
+    const response = await fetch(result.url);
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href     = result.url;
+    a.href = blobUrl;
     a.download = result.filename;
-    a.target   = "_blank";
-    a.rel      = "noopener noreferrer";
     a.click();
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+  } catch (e) {
+    // Fallback — open in new tab
+    window.open(result.url, "_blank");
   }
+}
 
   function reset() {
     setUrl(""); setStatus(STATUS.idle); setResult(null); setError(""); setProgress(0);
@@ -312,7 +319,7 @@ export default function SongRip() {
                   </div>
                 </div>
                 <div style={{ display:"flex", gap:12, alignItems:"center" }}>
-                  <button className="dl-btn" onClick={handleDownload}>↓&nbsp;&nbsp;Save {result.ext?.toUpperCase()}</button>
+                  <button className="dl-btn" onClick={() => handleDownload()}>↓&nbsp;&nbsp;Save {result.ext?.toUpperCase()}</button>
                   <button className="ghost-btn" onClick={reset}>New extract</button>
                 </div>
               </div>
