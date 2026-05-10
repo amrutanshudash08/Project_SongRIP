@@ -34,13 +34,27 @@ export default async function handler(req, res) {
       const recordingId = params.get('recordingId');
       if (!recordingId) throw new Error('Could not find recording ID in StarMaker link.');
 
+      // Fetch song title from StarMaker API
+      let title = `starmaker-${recordingId}`;
+      try {
+        const apiRes = await fetch(
+          `https://www.starmakerstudios.com/api/social/recording/info?recordingId=${recordingId}`,
+          { headers: { 'User-Agent': 'Mozilla/5.0' } }
+        );
+        if (apiRes.ok) {
+          const data = await apiRes.json();
+          const raw = data?.data?.recordingName || data?.data?.name || data?.data?.songName || '';
+          if (raw) title = raw.replace(/[^\w\s\-()]/g, '').trim().slice(0, 80);
+        }
+      } catch (_) {}
+
       const audioUrl = `https://static-v7.smintro.com/production/uploading/recordings/${recordingId}/master.mp4`;
-      const filename = `starmaker-${recordingId}.m4a`;
+      const filename = `${title}.m4a`;
 
       return res.json({
         url: `/api/rip?proxy=${encodeURIComponent(audioUrl)}&filename=${encodeURIComponent(filename)}`,
         filename,
-        title: 'StarMaker Recording',
+        title,
         ext: 'm4a',
       });
     }
