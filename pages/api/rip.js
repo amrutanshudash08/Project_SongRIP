@@ -2,32 +2,48 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
+  // ── GET: proxy audio file with correct headers for iOS ──────────────
+  if (req.method === 'GET') {
+    try {
+      const { proxy, filename } = req.query;
+      if (!proxy) return res.status(400).json({ error: 'No proxy URL' });
+      const fileRes = await fetch(proxy);
+      if (!fileRes.ok) throw new Error('Could not fetch audio.');
+      res.setHeader('Content-Type', 'audio/mp4');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename || 'recording.m4a'}"`);
+      const buffer = await fileRes.arrayBuffer();
+      return res.send(Buffer.from(buffer));
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
+    }
+  }
+
+  // ── POST: extract audio URL ─────────────────────────────────────────
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
   try {
     let { url } = req.body;
 
-    // Extract URL from share message text
+    // Extract URL from full share message text
     const urlMatch = url.match(/https?:\/\/\S+/);
     if (urlMatch) url = urlMatch[0].replace(/['".,)]+$/, '');
 
     // ── StarMaker ──────────────────────────────────────────────────────
     if (url.includes('starmaker') || url.includes('starmakerstudios')) {
-  const params = new URL(url).searchParams;
-  const recordingId = params.get('recordingId');
-  if (!recordingId) throw new Error('Could not find recording ID in StarMaker link.');
+      const params = new URL(url).searchParams;
+      const recordingId = params.get('recordingId');
+      if (!recordingId) throw new Error('Could not find recording ID in StarMaker link.');
 
-  const audioUrl = `https://static-v7.smintro.com/production/uploading/recordings/${recordingId}/master.mp4`;
+      const audioUrl = `https://static-v7.smintro.com/production/uploading/recordings/${recordingId}/master.mp4`;
+      const filename = `starmaker-${recordingId}.m4a`;
 
-  // Proxy the file so we can set the correct Content-Type for iOS
-  const fileRes = await fetch(audioUrl);
-  if (!fileRes.ok) throw new Error('Could not fetch audio file.');
-
-  res.setHeader('Content-Type', 'audio/mp4');
-  res.setHeader('Content-Disposition', `attachment; filename="starmaker-${recordingId}.m4a"`);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-
-  const buffer = await fileRes.arrayBuffer();
-  return res.send(Buffer.from(buffer));
-}
+      return res.json({
+        url: `/api/rip?proxy=${encodeURIComponent(audioUrl)}&filename=${encodeURIComponent(filename)}`,
+        filename,
+        title: 'StarMaker Recording',
+        ext: 'm4a',
+      });
+    }
 
     // ── Smule ──────────────────────────────────────────────────────────
     if (url.includes('smule.com')) {
@@ -38,7 +54,11 @@ export default async function handler(req, res) {
         body: JSON.stringify({ url }),
       });
       let data;
-      try { data = await upstream.json(); } catch { throw new Error(`Backend error (${upstream.status})`); }
+      try {
+        data = await upstream.json();
+      } catch {
+        throw new Error(`Backend error (${upstream.status}) — try again in 10 seconds.`);
+      }
       return res.status(upstream.status).json(data);
     }
 
