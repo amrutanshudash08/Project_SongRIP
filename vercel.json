@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "api/rip.py": {
+      "runtime": "vercel-python@0.0.1",
+      "maxDuration": 30
+    }
+  }
+}
