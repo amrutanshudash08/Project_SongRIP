@@ -119,13 +119,14 @@ export default function SongRip() {
     }
   }
 
-  async function handleDownload() {
-  if (!result) return;
-  const a = document.createElement("a");
-  a.href = `/api/download?url=${encodeURIComponent(result.url)}&filename=${encodeURIComponent(result.filename)}`;
-  a.download = result.filename;
-  a.click();
-}
+  function handleDownload() {
+    if (!result) return;
+    const a = document.createElement("a");
+    a.href = result.url;
+    a.download = result.filename;
+    a.click();
+  }
+
   function reset() {
     setUrl(""); setStatus(STATUS.idle); setResult(null); setError(""); setProgress(0);
     setTimeout(() => inputRef.current?.focus(), 80);
@@ -309,7 +310,7 @@ export default function SongRip() {
                   </div>
                 </div>
                 <div style={{ display:"flex", gap:12, alignItems:"center" }}>
-                  <button className="dl-btn" onClick={() => handleDownload()}>↓&nbsp;&nbsp;Save {result.ext?.toUpperCase()}</button>
+                  <button className="dl-btn" onClick={handleDownload}>↓&nbsp;&nbsp;Save {result.ext?.toUpperCase()}</button>
                   <button className="ghost-btn" onClick={reset}>New extract</button>
                 </div>
               </div>
