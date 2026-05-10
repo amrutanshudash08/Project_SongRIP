@@ -34,19 +34,52 @@ export default async function handler(req, res) {
       const recordingId = params.get('recordingId');
       if (!recordingId) throw new Error('Could not find recording ID in StarMaker link.');
 
-      // Fetch song title from StarMaker API
       let title = `starmaker-${recordingId}`;
+
+      // Strategy 1: Try StarMaker API with multiple field names
       try {
         const apiRes = await fetch(
           `https://www.starmakerstudios.com/api/social/recording/info?recordingId=${recordingId}`,
-          { headers: { 'User-Agent': 'Mozilla/5.0' } }
+          { headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' } }
         );
         if (apiRes.ok) {
           const data = await apiRes.json();
-          const raw = data?.data?.recordingName || data?.data?.name || data?.data?.songName || '';
+          // Try every possible field name
+          const raw =
+            data?.data?.recordingName ||
+            data?.data?.name ||
+            data?.data?.songName ||
+            data?.data?.song_name ||
+            data?.data?.title ||
+            data?.data?.song?.name ||
+            data?.data?.song?.title ||
+            data?.recording?.name ||
+            data?.recording?.title ||
+            data?.name ||
+            data?.title ||
+            '';
           if (raw) title = raw.replace(/[^\w\s\-()]/g, '').trim().slice(0, 80);
         }
       } catch (_) {}
+
+      // Strategy 2: Fetch share page and extract og:title
+      if (title.startsWith('starmaker-')) {
+        try {
+          const pageRes = await fetch(
+            `https://m.starmakerstudios.com/a-vue3/playrecording?recordingId=${recordingId}`,
+            { headers: { 'User-Agent': 'Mozilla/5.0' } }
+          );
+          if (pageRes.ok) {
+            const html = await pageRes.text();
+            const ogTitle = html.match(/property="og:title"\s+content="([^"]+)"/);
+            const metaTitle = html.match(/<title>([^<]+)<\/title>/);
+            const raw = ogTitle?.[1] || metaTitle?.[1] || '';
+            if (raw && !raw.toLowerCase().includes('starmaker')) {
+              title = raw.replace(/[^\w\s\-()]/g, '').trim().slice(0, 80);
+            }
+          }
+        } catch (_) {}
+      }
 
       const audioUrl = `https://static-v7.smintro.com/production/uploading/recordings/${recordingId}/master.mp4`;
       const filename = `${title}.m4a`;
