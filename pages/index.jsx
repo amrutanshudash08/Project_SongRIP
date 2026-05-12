@@ -243,7 +243,7 @@ export default function SongRip() {
                     value={url} onChange={e => setUrl(e.target.value)}
                     onKeyDown={e => e.key==="Enter" && url.trim() && handleRip()}
                     onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
-                    placeholder="Paste your link here..."
+                    placeholder="https://www.smule.com/recording/..."
                     disabled={isLoading} />
                   {url && !isLoading && (
                     <button onClick={() => setUrl("")}
@@ -341,6 +341,12 @@ export default function SongRip() {
           <div style={{ fontSize:9, letterSpacing:"2.5px", textTransform:"uppercase", color:"#9A9088" }}>
             Personal use only · Respect artists' rights
           </div>
+          <a href="/guide" style={{
+            fontSize:9, letterSpacing:"2.5px", textTransform:"uppercase",
+            color:G3, textDecoration:"none",
+          }}>
+            User Guide →
+          </a>
           <div style={{ fontSize:11, letterSpacing:"1px", color:"#9A9088", fontWeight:300, display:"flex", alignItems:"center", gap:7 }}>
             <span style={{ color:G, fontSize:10 }}>✦</span>
             Made by{" "}
