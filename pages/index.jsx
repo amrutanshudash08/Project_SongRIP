@@ -2,10 +2,8 @@ import Head from "next/head";
 import { useState, useEffect, useRef } from "react";
 
 const PLATFORMS = [
-  { name: "Smule",     pattern: /smule\.com/i,              icon: "S" },
-  { name: "StarMaker", pattern: /starmaker\.(us|com|io)/i,  icon: "★" },
-  { name: "Yokee",     pattern: /yokee\.com/i,              icon: "Y" },
-  { name: "SingSnap",  pattern: /singsnap\.com/i,           icon: "∿" },
+  { name: "Smule",     pattern: /smule\.com/i,                                            icon: "S", color: "#BF9B45" },
+  { name: "StarMaker", pattern: /starmaker\.(us|com|io)|starmakerstudios|onelink\.me/i,   icon: "★", color: "#BF9B45" },
 ];
 
 const G  = "#BF9B45";
@@ -195,10 +193,10 @@ export default function SongRip() {
             Song<em style={{ color:G, fontStyle:"italic" }}>Rip</em>
           </h1>
           <div style={{ marginTop:16, display:"flex", alignItems:"center", justifyContent:"center" }}>
-            {["Smule","StarMaker","Yokee","SingSnap"].map((n, i) => (
+            {["Smule","StarMaker"].map((n, i) => (
               <span key={i} style={{ display:"flex", alignItems:"center" }}>
                 <span style={{ fontSize:10, letterSpacing:"2px", textTransform:"uppercase", color:"#9A9088" }}>{n}</span>
-                {i < 3 && <span style={{ margin:"0 12px", color:"#9A9088" }}>·</span>}
+                {i < 1 && <span style={{ margin:"0 12px", color:"#9A9088" }}>·</span>}
               </span>
             ))}
           </div>
@@ -252,12 +250,26 @@ export default function SongRip() {
                 </div>
 
                 {platform && !isLoading && (
-                  <div style={{ display:"inline-flex", alignItems:"center", gap:8,
-                    border:"1px solid rgba(191,155,69,.22)", borderRadius:2, padding:"5px 14px", marginBottom:26,
-                    fontSize:9, letterSpacing:"3px", textTransform:"uppercase", color:G,
-                    background:"rgba(191,155,69,.05)", animation:"fade-up .3s ease" }}>
-                    <span style={{ fontSize:12 }}>{platform.icon}</span>
-                    {platform.name} detected
+                  <div style={{
+                    display:"inline-flex", alignItems:"center", gap:10,
+                    border:`1px solid ${platform.name === "StarMaker" ? "rgba(168,130,255,.3)" : "rgba(191,155,69,.22)"}`,
+                    borderRadius:2, padding:"7px 16px", marginBottom:26,
+                    background: platform.name === "StarMaker" ? "rgba(168,130,255,.07)" : "rgba(191,155,69,.05)",
+                    animation:"fade-up .3s ease",
+                  }}>
+                    <span style={{
+                      fontSize:14,
+                      filter: platform.name === "StarMaker" ? "drop-shadow(0 0 6px rgba(168,130,255,.6))" : "drop-shadow(0 0 6px rgba(191,155,69,.5))",
+                    }}>{platform.icon}</span>
+                    <div>
+                      <div style={{ fontSize:10, letterSpacing:"2.5px", textTransform:"uppercase",
+                        color: platform.name === "StarMaker" ? "#C4A8FF" : G, lineHeight:1.2 }}>
+                        {platform.name}
+                      </div>
+                      <div style={{ fontSize:8, letterSpacing:"2px", textTransform:"uppercase", color:"#9A9088", marginTop:2 }}>
+                        Detected
+                      </div>
+                    </div>
                   </div>
                 )}
 
