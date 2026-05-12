@@ -28,15 +28,26 @@ export default async function handler(req, res) {
     const urlMatch = url.match(/https?:\/\/\S+/);
     if (urlMatch) url = urlMatch[0].replace(/['".,)]+$/, '');
 
-    // ── StarMaker ──────────────────────────────────────────────────────
-    if (url.includes('starmaker') || url.includes('starmakerstudios')) {
+    // ── StarMaker (including OneLink redirects) ────────────────────────
+    if (url.includes('starmaker') || url.includes('starmakerstudios') || url.includes('onelink.me')) {
+
+      // Follow redirects for OneLink URLs to get the real starmakerstudios.com URL
+      if (url.includes('onelink.me')) {
+        try {
+          const redirectRes = await fetch(url, {
+            redirect: 'follow',
+            headers: { 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15' },
+          });
+          url = redirectRes.url;
+        } catch (_) {}
+      }
+
       const params = new URL(url).searchParams;
       const recordingId = params.get('recordingId');
       if (!recordingId) throw new Error('Could not find recording ID in StarMaker link.');
 
+      // Fetch song title from StarMaker API
       let title = `starmaker-${recordingId}`;
-
-      // Strategy 1: StarMaker API
       try {
         const apiRes = await fetch(
           `https://www.starmakerstudios.com/api/social/recording/info?recordingId=${recordingId}`,
@@ -60,17 +71,14 @@ export default async function handler(req, res) {
 
           if (raw) {
             let cleaned = raw;
-            // Extract song name from share text e.g. "User just sang the song X how can the voice..."
             const songMatch = raw.match(/(?:just sang(?:\s+the\s+song)?|sang\s+the\s+song)\s+(.+?)(?:\s+how\s+|\s+check\s+|\s+listen\s+|\s+i\s+|\s+my\s+|$)/i);
-            if (songMatch) {
-              cleaned = songMatch[1];
-            }
+            if (songMatch) cleaned = songMatch[1];
             title = cleaned.replace(/[^\w\s\-()]/g, '').trim().slice(0, 80);
           }
         }
       } catch (_) {}
 
-      // Strategy 2: Fetch share page og:title
+      // Fallback: fetch share page og:title
       if (title.startsWith('starmaker-')) {
         try {
           const pageRes = await fetch(
@@ -83,7 +91,6 @@ export default async function handler(req, res) {
             const metaTitle = html.match(/<title>([^<]+)<\/title>/);
             const raw = ogTitle?.[1] || metaTitle?.[1] || '';
             if (raw && !raw.toLowerCase().includes('starmaker')) {
-              // Also try to extract song name from og:title if it's a share phrase
               const songMatch = raw.match(/(?:just sang(?:\s+the\s+song)?|sang\s+the\s+song)\s+(.+?)(?:\s+how\s+|\s+check\s+|\s+listen\s+|$)/i);
               title = (songMatch ? songMatch[1] : raw).replace(/[^\w\s\-()]/g, '').trim().slice(0, 80);
             }
