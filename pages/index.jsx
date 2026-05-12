@@ -241,7 +241,7 @@ export default function SongRip() {
                     value={url} onChange={e => setUrl(e.target.value)}
                     onKeyDown={e => e.key==="Enter" && url.trim() && handleRip()}
                     onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
-                    placeholder="https://www.smule.com/recording/..."
+                    placeholder="Paste Link Here..."
                     disabled={isLoading} />
                   {url && !isLoading && (
                     <button onClick={() => setUrl("")}
